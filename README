@@ -1,0 +1,30 @@
+What is ActiveMQLite?
+
+ActiveMQLite is a thin layer which sits on top of ActiveMQ, allowing the user to export
+arbitrary objects. The exported objects can be accessed from remote connections as if they
+are local objects.
+
+There is only one entry point into ActiveMQLite - JMSConnection. Use JMSConnection#publish to export
+local objects and JMSConnection#lookup to access remote objects. Use JMSConnection#exportInterface
+to export interfaces that will be passed as object handles when used as parameters to methods or
+return values.
+
+Note on serialization:
+
+Serialization assumes that the objects are either exported interfaces (in which case object handles
+are passed across) or Java bean objects.
+
+Typical Usage:
+
+// Start a JMS BrokerServer (optional)
+JMSConnection.startBrokerService(10212);
+
+// On the server side which publishes an object myObject implementing MyInterface
+JMSConnection c = new JMSConnection("server", "tcp://localhost:10212");
+c.publish(myObject, MyInterface.class);
+
+// On the server side
+JMSConnection c = new JMSConnection("client", "tcp://localhost:10212");
+MyInterface o = c.lookup("server", MyInterface.class);
+
+// ... Use o here.
